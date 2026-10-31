@@ -66,10 +66,10 @@ public class Main {
                     registrarSalida();
                     break;
                 case 3:
-                    imprimir("Reporte de ocupación en construcción...");
+                    mostrarReporteOcupacion();
                     break;
                 case 4:
-                    imprimir("Reporte financiero en construcción...");
+                    mostrarReporteFinanciero();
                     break;
                 case 5:
                     continuar = false;
@@ -210,7 +210,7 @@ public class Main {
         return valor;
     }
 
-    // PASO 6: REGISTRO
+    // PASO 6: REGISTRO DE SALIDA
 
     static void registrarSalida() {
         if (celdasOcupadas == 0) {
@@ -314,6 +314,23 @@ public class Main {
         }
         imprimir("Total a pagar: $" + totalPagar);
         imprimir("-------------------------");
+    }
+
+    // PASO 8: REPORTES
+
+    static void mostrarReporteOcupacion() {
+        imprimir("\n--- REPORTE DE OCUPACIÓN ---");
+        imprimir("Cantidad de celdas ocupadas: " + celdasOcupadas);
+        imprimir("Cantidad de celdas libres:   " + celdasLibres);
+        imprimir("----------------------------");
+    }
+
+    static void mostrarReporteFinanciero() {
+        imprimir("\n--- REPORTE FINANCIERO ---");
+        imprimir("Total recaudado por carros: $" + recaudoCarros);
+        imprimir("Total recaudado por motos:  $" + recaudoMotos);
+        imprimir("Total general recaudado:    $" + recaudoTotal);
+        imprimir("--------------------------");
     }
 
     // MÉTODOS ADICIONALES
