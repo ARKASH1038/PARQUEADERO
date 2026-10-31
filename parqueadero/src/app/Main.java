@@ -21,7 +21,7 @@ public class Main {
 
     static final DateTimeFormatter FORMATO_FECHA_HORA = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
-    // 2. RECURSO
+    // 2. RECURSOS
 
     static final Scanner SCANNER = new Scanner(System.in);
 
@@ -63,7 +63,7 @@ public class Main {
                     registrarEntrada();
                     break;
                 case 2:
-                    imprimir("Funcionalidad de salida en construcción...");
+                    registrarSalida();
                     break;
                 case 3:
                     imprimir("Reporte de ocupación en construcción...");
@@ -79,7 +79,7 @@ public class Main {
         }
     }
 
-    // PASO 3: REGISTRO
+    // PASO 3: REGISTRO DE ENTRADA
 
     static void registrarEntrada() {
         int indiceCelda = buscarCeldaDisponible();
@@ -168,7 +168,6 @@ public class Main {
             }
 
             LocalDateTime fechaHora = LocalDateTime.parse(texto, FORMATO_FECHA_HORA);
-            // Comprobar que la fecha exista realmente en el calendario (Sección 3 y 9)
             if (!fechaHora.format(FORMATO_FECHA_HORA).equals(texto)) {
                 imprimir("La fecha ingresada no existe en el calendario. Intente nuevamente.");
                 continue;
@@ -211,7 +210,67 @@ public class Main {
         return valor;
     }
 
-    // MÉTODOS ADICIONALES DE ORGANIZACIÓN
+    // PASO 6: REGISTRO DE SALIDA
+
+    static void registrarSalida() {
+        if (celdasOcupadas == 0) {
+            imprimir("No hay vehículos en el parqueadero actualmente.");
+            return;
+        }
+
+        int numeroCelda = leerNumeroCelda();
+        int indiceCelda = numeroCelda - 1;
+
+        if (tiposVehiculo[indiceCelda] == null) {
+            imprimir("La celda #" + numeroCelda + " se encuentra libre. No hay vehículo para retirar.");
+            return;
+        }
+
+        String tipoVehiculo = tiposVehiculo[indiceCelda];
+        LocalDateTime fechaHoraIngreso = fechasIngreso[indiceCelda];
+        LocalDateTime fechaHoraSalida = leerFechaHoraSalidaValida(fechaHoraIngreso);
+
+        // Solicitar liquidación
+
+        long valorLiquidado = liquidarEstadia(numeroCelda, tipoVehiculo, fechaHoraIngreso, fechaHoraSalida);
+
+        // Acumular el recaudo
+
+        if (tipoVehiculo.equals("CARRO")) {
+            recaudoCarros += valorLiquidado;
+        } else {
+            recaudoMotos += valorLiquidado;
+        }
+        recaudoTotal += valorLiquidado;
+
+        // Liberar la celda
+
+        tiposVehiculo[indiceCelda] = null;
+        fechasIngreso[indiceCelda] = null;
+        celdasOcupadas--;
+        celdasLibres++;
+
+        imprimir("Celda #" + numeroCelda + " liberada correctamente.");
+    }
+
+    static LocalDateTime leerFechaHoraSalidaValida(LocalDateTime fechaHoraIngreso) {
+        while (true) {
+            LocalDateTime fechaHoraSalida = leerFechaHora("Ingrese fecha y hora de salida (yyyy-MM-dd HH:mm): ");
+            if (fechaHoraSalida.isBefore(fechaHoraIngreso)) {
+                imprimir("La fecha y hora de salida no puede ser anterior a la de ingreso ("
+                        + fechaHoraIngreso.format(FORMATO_FECHA_HORA) + ").");
+                continue;
+            }
+            return fechaHoraSalida;
+        }
+    }
+
+    // Método base de liquidación (Se implementará completo en el Paso 7)
+    static long liquidarEstadia(int numeroCelda, String tipoVehiculo, LocalDateTime ingreso, LocalDateTime salida) {
+        return 0;
+    }
+
+    // MÉTODOS
 
     static void inicializarDatos() {
         for (int i = 0; i < CAPACIDAD_TOTAL; i++) {
