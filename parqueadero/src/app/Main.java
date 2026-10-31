@@ -79,7 +79,7 @@ public class Main {
         }
     }
 
-    // PASO 3: REGISTRO DE ENTRADA
+    // PASO 3: REGISTRO
 
     static void registrarEntrada() {
         int indiceCelda = buscarCeldaDisponible();
@@ -113,22 +113,102 @@ public class Main {
         return -1;
     }
 
-    // MÉTODOS BASE DE VALIDACIÓN
+    // PASO 5: VALIDACIÓN DE DATOS
 
     static int leerOpcionMenu() {
-        System.out.print("Seleccione una opción: ");
-        return Integer.parseInt(SCANNER.nextLine().trim());
+        while (true) {
+            System.out.print("Seleccione una opción (1-5): ");
+            String entrada = SCANNER.nextLine().trim();
+            if (entrada.isEmpty()) {
+                imprimir("Opción inválida. Debe ingresar un número entre 1 y 5.");
+                continue;
+            }
+            int opcion = leerDigitos(entrada, 0, entrada.length());
+            if (opcion >= 1 && opcion <= 5) {
+                return opcion;
+            }
+            imprimir("Opción inválida. Debe ingresar un número entre 1 y 5.");
+        }
     }
 
     static String leerTipoVehiculo() {
-        System.out.print("Ingrese el tipo de vehículo (CARRO / MOTO): ");
-        return SCANNER.nextLine().trim().toUpperCase();
+        while (true) {
+            System.out.print("Ingrese el tipo de vehículo (CARRO / MOTO): ");
+            String tipo = SCANNER.nextLine().trim().toUpperCase();
+            if (tipo.equals("CARRO") || tipo.equals("MOTO")) {
+                return tipo;
+            }
+            imprimir("Tipo de vehículo inválido. Ingrese únicamente CARRO o MOTO.");
+        }
+    }
+
+    static int leerNumeroCelda() {
+        while (true) {
+            System.out.print("Ingrese el número de celda (1-" + CAPACIDAD_TOTAL + "): ");
+            String entrada = SCANNER.nextLine().trim();
+            if (entrada.isEmpty()) {
+                imprimir("Celda inválida. Ingrese un número entre 1 y " + CAPACIDAD_TOTAL + ".");
+                continue;
+            }
+            int celda = leerDigitos(entrada, 0, entrada.length());
+            if (celda >= 1 && celda <= CAPACIDAD_TOTAL) {
+                return celda;
+            }
+            imprimir("Celda inválida. Ingrese un número entre 1 y " + CAPACIDAD_TOTAL + ".");
+        }
     }
 
     static LocalDateTime leerFechaHora(String mensaje) {
-        System.out.print(mensaje);
-        String texto = SCANNER.nextLine().trim();
-        return LocalDateTime.parse(texto, FORMATO_FECHA_HORA);
+        while (true) {
+            System.out.print(mensaje);
+            String texto = SCANNER.nextLine().trim();
+            if (!formatoFechaHoraValido(texto)) {
+                imprimir("Fecha u hora inválidas. Use yyyy-MM-dd HH:mm y el horario 08:00-22:00.");
+                continue;
+            }
+
+            LocalDateTime fechaHora = LocalDateTime.parse(texto, FORMATO_FECHA_HORA);
+            // Comprobar que la fecha exista realmente en el calendario (Sección 3 y 9)
+            if (!fechaHora.format(FORMATO_FECHA_HORA).equals(texto)) {
+                imprimir("La fecha ingresada no existe en el calendario. Intente nuevamente.");
+                continue;
+            }
+
+            return fechaHora;
+        }
+    }
+
+    static boolean formatoFechaHoraValido(String texto) {
+        if (texto.length() != 16
+                || texto.charAt(4) != '-'
+                || texto.charAt(7) != '-'
+                || texto.charAt(10) != ' '
+                || texto.charAt(13) != ':') {
+            return false;
+        }
+
+        int anio = leerDigitos(texto, 0, 4);
+        int mes = leerDigitos(texto, 5, 2);
+        int dia = leerDigitos(texto, 8, 2);
+        int hora = leerDigitos(texto, 11, 2);
+        int minuto = leerDigitos(texto, 14, 2);
+
+        return anio >= 1 && mes >= 1 && mes <= 12 && dia >= 1 && dia <= 31
+                && hora >= HORA_APERTURA && hora <= HORA_CIERRE
+                && (hora != HORA_CIERRE || minuto <= 0)
+                && minuto >= 0 && minuto <= 59;
+    }
+
+    static int leerDigitos(String texto, int inicio, int cantidad) {
+        int valor = 0;
+        for (int i = inicio; i < inicio + cantidad; i++) {
+            char caracter = texto.charAt(i);
+            if (caracter < '0' || caracter > '9') {
+                return -1;
+            }
+            valor = valor * 10 + caracter - '0';
+        }
+        return valor;
     }
 
     // MÉTODOS ADICIONALES DE ORGANIZACIÓN
