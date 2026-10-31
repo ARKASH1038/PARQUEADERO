@@ -21,7 +21,7 @@ public class Main {
 
     static final DateTimeFormatter FORMATO_FECHA_HORA = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
-    // 2. RECURSOS
+    // 2. RECURSO
 
     static final Scanner SCANNER = new Scanner(System.in);
 
@@ -102,10 +102,18 @@ public class Main {
         imprimir("Ingreso registrado exitosamente. Vehículo (" + tipoVehiculo + ") asignado a la celda #" + numeroCelda + ".");
     }
 
-    // MÉTODOS BASE (Se completarán en los Pasos 4 y 5)
+    // PASO 4: CELDA DISPONIBLE
+
     static int buscarCeldaDisponible() {
-        return 0;
+        for (int i = 0; i < CAPACIDAD_TOTAL; i++) {
+            if (tiposVehiculo[i] == null) {
+                return i;
+            }
+        }
+        return -1;
     }
+
+    // MÉTODOS BASE DE VALIDACIÓN
 
     static int leerOpcionMenu() {
         System.out.print("Seleccione una opción: ");
