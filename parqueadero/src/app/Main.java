@@ -210,7 +210,7 @@ public class Main {
         return valor;
     }
 
-    // PASO 6: REGISTRO DE SALIDA
+    // PASO 6: REGISTRO
 
     static void registrarSalida() {
         if (celdasOcupadas == 0) {
@@ -230,11 +230,7 @@ public class Main {
         LocalDateTime fechaHoraIngreso = fechasIngreso[indiceCelda];
         LocalDateTime fechaHoraSalida = leerFechaHoraSalidaValida(fechaHoraIngreso);
 
-        // Solicitar liquidación
-
         long valorLiquidado = liquidarEstadia(numeroCelda, tipoVehiculo, fechaHoraIngreso, fechaHoraSalida);
-
-        // Acumular el recaudo
 
         if (tipoVehiculo.equals("CARRO")) {
             recaudoCarros += valorLiquidado;
@@ -242,8 +238,6 @@ public class Main {
             recaudoMotos += valorLiquidado;
         }
         recaudoTotal += valorLiquidado;
-
-        // Liberar la celda
 
         tiposVehiculo[indiceCelda] = null;
         fechasIngreso[indiceCelda] = null;
@@ -265,12 +259,64 @@ public class Main {
         }
     }
 
-    // Método base de liquidación (Se implementará completo en el Paso 7)
+    // PASO 7: LIQUIDACIÓN Y FACTURA
+
     static long liquidarEstadia(int numeroCelda, String tipoVehiculo, LocalDateTime ingreso, LocalDateTime salida) {
-        return 0;
+        long diasACobrar = contarDiasCompletos(ingreso, salida);
+        LocalDateTime cursor = ingreso.plusDays(diasACobrar);
+        long horasACobrar = calcularHorasRestantes(cursor, salida);
+
+        if (horasACobrar >= UMBRAL_HORAS_DIA) {
+            diasACobrar++;
+            horasACobrar = 0;
+        }
+
+        int tarifaDia = tipoVehiculo.equals("CARRO") ? TARIFA_DIA_CARRO : TARIFA_DIA_MOTO;
+        int tarifaHora = tipoVehiculo.equals("CARRO") ? TARIFA_HORA_CARRO : TARIFA_HORA_MOTO;
+
+        long subtotalDias = diasACobrar * tarifaDia;
+        long subtotalHoras = horasACobrar * tarifaHora;
+        long totalPagar = subtotalDias + subtotalHoras;
+
+        mostrarFactura(numeroCelda, tipoVehiculo, ingreso, salida,
+                diasACobrar, tarifaDia, subtotalDias,
+                horasACobrar, tarifaHora, subtotalHoras, totalPagar);
+
+        return totalPagar;
     }
 
-    // MÉTODOS
+    static long contarDiasCompletos(LocalDateTime ingreso, LocalDateTime salida) {
+        return ChronoUnit.DAYS.between(ingreso, salida);
+    }
+
+    static long calcularHorasRestantes(LocalDateTime cursor, LocalDateTime salida) {
+        long minutosRestantes = Duration.between(cursor, salida).toMinutes();
+        return (minutosRestantes + 59) / 60;
+    }
+
+    static void mostrarFactura(int numeroCelda, String tipoVehiculo, LocalDateTime ingreso, LocalDateTime salida,
+                               long dias, int tarifaDia, long subtotalDias,
+                               long horas, int tarifaHora, long subtotalHoras, long totalPagar) {
+        imprimir("\n--- FACTURA DE SALIDA ---");
+        imprimir("Celda liberada: #" + numeroCelda);
+        imprimir("Tipo de vehículo: " + tipoVehiculo);
+        imprimir("Fecha y hora de ingreso: " + ingreso.format(FORMATO_FECHA_HORA));
+        imprimir("Fecha y hora de salida:  " + salida.format(FORMATO_FECHA_HORA));
+        imprimir("Desglose de cobro:");
+        if (dias > 0) {
+            imprimir("  - Días cobrados: " + dias + " x $" + tarifaDia + " = $" + subtotalDias);
+        }
+        if (horas > 0) {
+            imprimir("  - Horas cobradas: " + horas + " x $" + tarifaHora + " = $" + subtotalHoras);
+        }
+        if (dias == 0 && horas == 0) {
+            imprimir("  - Sin tiempo facturable ($0)");
+        }
+        imprimir("Total a pagar: $" + totalPagar);
+        imprimir("-------------------------");
+    }
+
+    // MÉTODOS ADICIONALES
 
     static void inicializarDatos() {
         for (int i = 0; i < CAPACIDAD_TOTAL; i++) {
